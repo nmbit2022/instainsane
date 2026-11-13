@@ -71,6 +71,15 @@ def test_coordinator_returns_all_results():
     assert "comprar y mantener" in names
 
 
+def test_chart_agents_valid_signals():
+    from agents.chart_patterns import BollingerBounce, Engulfing, GoldenCross, MACDCross
+    df = _toy_df()
+    for agent in (GoldenCross(), MACDCross(), BollingerBounce(), Engulfing()):
+        sig = agent.generate_signals(df)
+        assert len(sig) == len(df)
+        assert set(np.unique(sig.dropna())) <= {-1.0, 0.0, 1.0}
+
+
 def test_higher_cost_reduces_return():
     # Para una estrategia que opera, más costo no debe mejorar el retorno.
     df = _toy_df()
@@ -98,6 +107,7 @@ if __name__ == "__main__":
     test_no_lookahead_flat_signal_stays_flat()
     test_buy_and_hold_matches_price()
     test_coordinator_returns_all_results()
+    test_chart_agents_valid_signals()
     test_higher_cost_reduces_return()
     test_walkforward_runs()
     print("Todos los tests pasaron.")

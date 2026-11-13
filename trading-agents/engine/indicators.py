@@ -48,3 +48,19 @@ def realized_vol(series: pd.Series, window: int = 20) -> pd.Series:
     """Volatilidad realizada anualizada a partir de retornos log."""
     log_ret = np.log(series / series.shift(1))
     return log_ret.rolling(window, min_periods=window).std() * np.sqrt(252)
+
+def macd(series: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9):
+    """MACD: diferencia de dos EMAs y su línea de señal. Devuelve (macd, señal, histograma)."""
+    macd_line = ema(series, fast) - ema(series, slow)
+    signal_line = macd_line.ewm(span=signal, adjust=False, min_periods=signal).mean()
+    hist = macd_line - signal_line
+    return macd_line, signal_line, hist
+
+
+def bollinger(series: pd.Series, window: int = 20, k: float = 2.0):
+    """Bandas de Bollinger: media móvil +/- k desviaciones. Devuelve (media, superior, inferior)."""
+    mid = series.rolling(window, min_periods=window).mean()
+    std = series.rolling(window, min_periods=window).std()
+    upper = mid + k * std
+    lower = mid - k * std
+    return mid, upper, lower
