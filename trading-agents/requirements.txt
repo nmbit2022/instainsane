@@ -1,0 +1,5 @@
+pandas>=2.0
+numpy>=1.24
+# Opcionales (solo para descargar datos reales y graficar):
+yfinance>=0.2
+matplotlib>=3.7
