@@ -12,6 +12,8 @@ from __future__ import annotations
 import argparse
 import os
 
+import pandas as pd
+
 from agents import Breakout, Coordinator, MeanReversion, RiskManager, TrendFollower
 from engine.data_loader import load_csv
 from engine.metrics import format_metrics
@@ -28,6 +30,10 @@ def main() -> None:
     ap.add_argument("--split", type=float, default=None, metavar="FRAC",
                     help="Prueba fuera de muestra: divide los datos en FRAC "
                          "(p. ej. 0.6) y compara la 1ra parte vs la 2da.")
+    ap.add_argument("--start", default=None, metavar="YYYY-MM-DD",
+                    help="Recortar: usar solo datos desde esta fecha.")
+    ap.add_argument("--end", default=None, metavar="YYYY-MM-DD",
+                    help="Recortar: usar solo datos hasta esta fecha.")
     args = ap.parse_args()
 
     if not os.path.exists(args.data):
@@ -38,6 +44,15 @@ def main() -> None:
         )
 
     df = load_csv(args.data)
+
+    # Recorte por fechas (para analizar un periodo concreto, p. ej. uno lateral).
+    if args.start:
+        df = df.loc[df.index >= pd.Timestamp(args.start)]
+    if args.end:
+        df = df.loc[df.index <= pd.Timestamp(args.end)]
+    if len(df) < 250:
+        raise SystemExit("Muy pocos datos tras el recorte de fechas (se necesitan ~250 días).")
+
     print(f"Datos: {args.data}  |  {len(df)} días  |  "
           f"{df.index[0].date()} -> {df.index[-1].date()}\n")
 

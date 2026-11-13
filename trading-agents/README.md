@@ -88,6 +88,7 @@ backtest estaba sobreajustado.
 ## Opciones útiles
 
 ```bash
+python run.py --start 2013-01-01 --end 2019-06-01   # analizar un periodo concreto (p. ej. lateral)
 python run.py --no-short            # solo posiciones largas (sin ponerse corto)
 python run.py --target-vol 0.10    # apuntar a menos volatilidad (más conservador)
 python run.py --max-drawdown 0.15  # kill-switch más estricto
