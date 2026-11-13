@@ -122,8 +122,20 @@ Probamos golden cross, MACD, Bollinger y patrón envolvente (engulfing).
 - Golden cross y MACD son seguidores de tendencia: capturaron parte de la subida
   del oro ("beta"), no un edge predictivo.
 
-**Conclusión:** el análisis técnico de gráfico, probado con rigor, no mostró una
-ventaja fiable sobre comprar y mantener.
+**Conclusión (oro):** el análisis técnico de gráfico, probado con rigor, no mostró
+una ventaja fiable sobre comprar y mantener.
+
+**En el Nasdaq** las de gráfico mejoraron (hay tendencia): el **Golden Cross** fue
+consistente fuera de muestra (Sharpe 0.86 y 0.85), la primera en no darse vuelta. El
+walk-forward de gráfico dio +159% / Sharpe 0.71 — positivo, pero **peor que el
+conjunto clásico** (+337%) y por debajo de comprar y mantener (0.88). El `engulfing`
+se veía genial en entrenamiento (train ~1.4), el selector lo elegía, y colapsó en
+2022 (-15%): overfitting puro.
+
+> De todo el análisis técnico, lo único con mérito repetible es **seguir tendencia**
+> (golden cross, MACD), y solo en mercados que tienden. Los patrones (velas,
+> Bollinger) no mostraron edge fiable. Y ni lo que funciona le gana a aguantar en
+> retorno: su valor es reducir la caída.
 
 ### Otro mercado: NASDAQ (QQQ) — las conclusiones NO generalizan
 
