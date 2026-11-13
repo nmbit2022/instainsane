@@ -77,6 +77,35 @@ Las "mejores" del pasado fueron las peores del futuro, y viceversa. El **EQUIPO
 El `Sharpe train` (lo que prometía) **no predijo** el `Sharpe test` (lo que
 resultó). El sistema "inteligente" **perdió dinero** en 12 años.
 
+### Regímenes: lateral (2013-2019) vs alcista (2019-2026)
+
+| | Lateral (Sharpe) | Alcista (Sharpe) |
+|---|---|---|
+| reversión | 0.20 | 0.80 |
+| tendencia | -0.25 | 0.25 |
+| ruptura | -0.36 | 0.26 |
+| EQUIPO (simple) | -0.12 | 0.96 |
+| comprar y mantener | 0.12 | 0.87 |
+
+- La **reversión** fue positiva en ambos regímenes (la más robusta).
+- En el lateral, el oro no fue a ningún lado (buy&hold +4%); ahí la **reversión le
+  ganó** a aguantar, con la mitad de caída.
+- En el alcista, el **EQUIPO simple** incluso superó a buy&hold en Sharpe (0.96 vs
+  0.87) con la mitad de drawdown — aunque buy&hold ganó mucho más en retorno bruto.
+
+### Coordinador ADAPTATIVO (ponderar por rendimiento reciente): FALLÓ
+
+| | EQUIPO simple | EQUIPO adaptativo |
+|---|---|---|
+| Lateral 2013-2019 | Sharpe -0.12 | **-0.71** (peor) |
+| Alcista 2019-2026 | Sharpe 0.96 | **0.28** (peor) |
+
+Ponderar por rendimiento reciente = perseguir al ganador de ayer. Como el
+rendimiento de una estrategia revierte, el adaptativo cargaba peso en el agente
+equivocado justo antes del giro del mercado. **El promedio simple resultó más
+robusto que el "inteligente".** Principio real: la diversificación ingenua (1/N)
+es muy difícil de superar.
+
 ---
 
 ## 4. Las lecciones (lo más importante)
@@ -91,8 +120,12 @@ resultó). El sistema "inteligente" **perdió dinero** en 12 años.
    fracaso personal.
 4. **Diversificar (el "equipo") es más robusto que apostar a una sola estrategia**,
    porque no se puede saber de antemano cuál funcionará.
-5. **El resultado depende del régimen** del mercado (alcista vs caótico), y el
-   régimen no se puede predecir.
+5. **El resultado depende del régimen** del mercado (lateral vs tendencia), y el
+   régimen no se puede predecir. La reversión ayuda en laterales; aguantar gana en
+   tendencias.
+6. **Lo "más inteligente" no suele ganar.** El coordinador adaptativo (una mejora
+   obvia) empeoró todo. El promedio simple (1/N) fue más robusto. La complejidad
+   se paga cara y rara vez compensa.
 
 ---
 
