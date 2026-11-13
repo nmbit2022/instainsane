@@ -89,7 +89,8 @@ def main() -> None:
 
     results = _run_and_print(build_coordinator(), df, "RESULTADOS DEL BACKTEST (oro)")
     print("Guía rápida: Sharpe alto = buen retorno por riesgo. MaxDD = peor caída.")
-    print("'EQUIPO (consenso)' combina a los tres agentes; 'comprar y mantener' es la referencia.")
+    print("'EQUIPO (simple)' promedia parejo; 'EQUIPO (adaptativo)' pondera por")
+    print("rendimiento reciente; 'comprar y mantener' es la referencia.")
 
     if args.plot:
         make_plot(results)

@@ -63,10 +63,11 @@ def test_buy_and_hold_matches_price():
 def test_coordinator_returns_all_results():
     df = _toy_df()
     results = Coordinator().run(df)
-    # 3 agentes + ensemble + buy&hold
-    assert len(results) == 5
+    # 3 agentes + ensemble simple + ensemble adaptativo + buy&hold
+    assert len(results) == 6
     names = {r.name for r in results}
-    assert "EQUIPO (consenso)" in names
+    assert "EQUIPO (simple)" in names
+    assert "EQUIPO (adaptativo)" in names
     assert "comprar y mantener" in names
 
 
