@@ -125,6 +125,36 @@ Probamos golden cross, MACD, Bollinger y patrón envolvente (engulfing).
 **Conclusión:** el análisis técnico de gráfico, probado con rigor, no mostró una
 ventaja fiable sobre comprar y mantener.
 
+### Otro mercado: NASDAQ (QQQ) — las conclusiones NO generalizan
+
+Repetimos todo en el Nasdaq-100 (QQQ), 2010-2026. Resultado muy distinto al oro:
+
+**Fuera de muestra (`--split 0.6`):** el EQUIPO simple fue **consistente** en ambas
+mitades (Sharpe 1.04 y 0.95), igualó o superó a comprar y mantener en Sharpe, y con
+mucha menos caída (DD -13% a -15% vs -23% a -36%).
+
+**Walk-forward (el juez definitivo):**
+
+| | Retorno (12 años) | CAGR | Sharpe | MaxDD |
+|---|---|---|---|---|
+| WALK-FORWARD | +337% | 13.1% | 0.87 | **-20.8%** |
+| comprar y mantener | +625% | 18.0% | 0.88 | -35.6% |
+
+- A diferencia del oro (walk-forward **-7.4%**), aquí dio **+337%** y el `train` SÍ
+  predijo el `test` la mayoría de los años.
+- Empató en Sharpe con aguantar, pero con **~40% menos de caída máxima** (esquivó
+  parte del crash de 2022).
+- Aguantar ganó más en retorno bruto; tuvo un año malo (2022, -16%).
+
+**Por qué:** el Nasdaq tiene tendencias fuertes y persistentes; el seguimiento de
+tendencia (ruptura/tendencia) tiene ahí una ventaja más real que en el oro, que es
+más caótico. **El activo importa muchísimo.**
+
+> Conclusión transversal: no hay un "funciona / no funciona" universal. En activos
+> con tendencia fuerte, un equipo diversificado + gestión de riesgo puede dar un
+> retorno similar ajustado por riesgo con la mitad de la caída. En activos caóticos,
+> mejor aguantar. Depende del activo y de tu objetivo (máximo retorno vs no sufrir).
+
 ---
 
 ## 4. Las lecciones (lo más importante)
@@ -145,6 +175,11 @@ ventaja fiable sobre comprar y mantener.
 6. **Lo "más inteligente" no suele ganar.** El coordinador adaptativo (una mejora
    obvia) empeoró todo. El promedio simple (1/N) fue más robusto. La complejidad
    se paga cara y rara vez compensa.
+7. **El activo lo cambia todo.** Lo que falla en el oro (caótico) funciona en el
+   Nasdaq (tendencia fuerte). El seguimiento de tendencia necesita tendencias. No
+   hay conclusión universal: hay que probar en CADA mercado.
+8. **El valor suele estar en el riesgo, no en el retorno.** Cuando el equipo
+   "ganó", fue dando un retorno parecido con **mucha menos caída**, no ganando más.
 
 ---
 
