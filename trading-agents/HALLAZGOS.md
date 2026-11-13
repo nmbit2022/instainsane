@@ -106,6 +106,25 @@ equivocado justo antes del giro del mercado. **El promedio simple resultó más
 robusto que el "inteligente".** Principio real: la diversificación ingenua (1/N)
 es muy difícil de superar.
 
+### Estrategias de gráfico (análisis técnico clásico)
+
+Probamos golden cross, MACD, Bollinger y patrón envolvente (engulfing).
+
+- Fuera de muestra (`--split`) **ninguna fue consistente**: la que brillaba en la
+  Parte 1 fallaba en la Parte 2 (p. ej. golden cross 0.14 → -0.39).
+- En el **walk-forward** (`--set chart`) dieron +99% / Sharpe 0.57 en 12 años...
+  pero **por debajo de comprar y mantener** (+272% / 0.79), y con dos matices
+  demoledores:
+  1. El `Sharpe train` **no predijo** el `Sharpe test` (una config con train -0.15
+     dio el mejor test +1.76): elegir "la mejor del pasado" no aportó nada.
+  2. **Un solo año parabólico** (2025-2026, +65.7%) cargó con casi todo el
+     resultado; sin ese año, ~+20% en 11 años (casi plano).
+- Golden cross y MACD son seguidores de tendencia: capturaron parte de la subida
+  del oro ("beta"), no un edge predictivo.
+
+**Conclusión:** el análisis técnico de gráfico, probado con rigor, no mostró una
+ventaja fiable sobre comprar y mantener.
+
 ---
 
 ## 4. Las lecciones (lo más importante)
