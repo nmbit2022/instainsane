@@ -70,6 +70,21 @@ python run.py --data data/gold.csv --plot
 > Si falla la descarga, el script te muestra qué fuente falló y por qué, más
 > sugerencias. Suele ser el antivirus/VPN o una fuente temporalmente caída.
 
+## Prueba de robustez (evitar el sobreajuste)
+
+```bash
+# Dividir en pasado/futuro y comparar (out-of-sample simple):
+python run.py --data data/gold.csv --no-short --split 0.6
+
+# Walk-forward (estándar de la industria): rueda una ventana, elige la mejor
+# config solo con el pasado y la prueba en el tramo siguiente que no vio:
+python walkforward.py --data data/gold.csv --no-short --plot
+```
+
+La fila `WALK-FORWARD` es la estimación más honesta de lo que habrías ganado
+operando de verdad. Si es mucho peor que el backtest de una sola pasada, ese
+backtest estaba sobreajustado.
+
 ## Opciones útiles
 
 ```bash

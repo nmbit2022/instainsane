@@ -70,10 +70,23 @@ def test_coordinator_returns_all_results():
     assert "comprar y mantener" in names
 
 
+def test_walkforward_runs():
+    from walkforward import walk_forward
+    from agents import RiskManager
+    df = _toy_df(n=1600)
+    wf_ret, wf_equity, segments = walk_forward(
+        df, train_days=500, test_days=250, allow_short=False, risk=RiskManager()
+    )
+    assert len(segments) >= 1
+    assert len(wf_equity) > 0
+    assert np.isfinite(wf_equity.to_numpy()).all()
+
+
 if __name__ == "__main__":
     test_agents_produce_valid_signals()
     test_backtest_runs_and_is_finite()
     test_no_lookahead_flat_signal_stays_flat()
     test_buy_and_hold_matches_price()
     test_coordinator_returns_all_results()
+    test_walkforward_runs()
     print("Todos los tests pasaron.")
