@@ -4,11 +4,13 @@ Descarga datos REALES de oro y los guarda en CSV.
 Requiere conexión a internet (corre esto en tu máquina, no hace falta en el
 entorno de la nube si está restringido). Prueba varias fuentes gratuitas.
 
+Mercado por defecto: XAUUSD (oro spot contra el dólar).
+
 Uso:
-    python fetch_data.py                       # oro (GC=F) a data/gold.csv
-    python fetch_data.py --symbol GLD          # ETF de oro
+    python fetch_data.py --source stooq        # XAUUSD spot (recomendado) -> data/gold.csv
+    python fetch_data.py                        # XAUUSD=X vía yfinance
+    python fetch_data.py --symbol GC=F         # futuro de oro
     python fetch_data.py --start 2010-01-01
-    python fetch_data.py --source stooq        # fuente alternativa
 """
 from __future__ import annotations
 
@@ -51,7 +53,7 @@ def main() -> int:
 
     try:
         if args.source == "yfinance":
-            symbol = args.symbol or "GC=F"
+            symbol = args.symbol or "XAUUSD=X"
             df = fetch_yfinance(symbol, args.start, args.end)
         else:
             symbol = args.symbol or "xauusd"

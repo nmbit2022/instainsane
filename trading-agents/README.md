@@ -1,8 +1,8 @@
-# Equipo de agentes de trading — Backtesting de oro 🪙
+# Equipo de agentes de trading — Backtesting de XAUUSD 🪙
 
 Un **grupo de agentes** donde cada uno es una estrategia con un rol distinto, más
 un **gestor de riesgo** y un **coordinador** que los corre a todos, los combina por
-consenso y compara resultados sobre datos históricos de **oro**.
+consenso y compara resultados sobre datos históricos de **oro (XAUUSD)**.
 
 > ⚠️ **Esto NO es asesoría financiera ni un sistema que opera solo con tu dinero.**
 > Es una herramienta de **backtesting**: prueba ideas sobre el pasado para
@@ -53,13 +53,17 @@ Salida de ejemplo:
 
 *(Números con datos sintéticos, solo para demostrar el motor.)*
 
-## Usar datos REALES de oro
+## Usar datos REALES de XAUUSD
 
-En tu máquina (sin el bloqueo de red del entorno de la nube):
+Mercado objetivo: **XAUUSD** (oro spot contra el dólar). En tu máquina (sin el
+bloqueo de red del entorno de la nube):
 
 ```bash
-python fetch_data.py                    # baja GC=F (futuro de oro) a data/gold.csv
-python fetch_data.py --source stooq     # fuente alternativa (xauusd)
+python fetch_data.py --source stooq     # XAUUSD spot (recomendado) -> data/gold.csv
+# alternativas:
+python fetch_data.py                    # XAUUSD=X vía yfinance
+python fetch_data.py --symbol GC=F      # futuro de oro (COMEX)
+
 python run.py --data data/gold.csv --plot
 ```
 
