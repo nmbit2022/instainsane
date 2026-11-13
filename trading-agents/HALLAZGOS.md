@@ -1,0 +1,116 @@
+# Hallazgos — Equipo de agentes de trading sobre oro (XAUUSD / GC=F)
+
+Resumen honesto de lo que construimos, probamos y aprendimos. Datos reales de
+oro 2010-2026 (futuro GC=F, ~4243 días).
+
+> ⚠️ Esto es una herramienta educativa de backtesting. **No es asesoría
+> financiera.** Los resultados pasados no garantizan resultados futuros.
+
+---
+
+## 1. Qué construimos
+
+Un **equipo de agentes**, cada uno una estrategia con un rol:
+
+- 🏇 **Tendencia** — cruce de medias (EMA).
+- ↩️ **Reversión** — comprar sobreventa / vender sobrecompra (RSI).
+- 🚀 **Ruptura** — entrar al romper máximos/mínimos (Donchian).
+- 🛡️ **Gestor de riesgo** — tamaño por volatilidad, stop-loss por ATR, kill-switch por drawdown.
+- 🎯 **Coordinador** — combina a los tres por consenso (el "EQUIPO").
+
+Más un motor de backtest sin *lookahead* (con costos, stops y kill-switch) y
+herramientas de validación: prueba fuera de muestra (`--split`) y walk-forward
+(`walkforward.py`).
+
+---
+
+## 2. Un bug real que encontramos y arreglamos
+
+El stop-loss dejaba la posición plana **hasta que la señal cambiara de signo**.
+En una tendencia larga (señal constante), un solo stop dejaba al agente fuera de
+**todo** el movimiento siguiente. Por eso el seguidor de tendencia *perdía* en un
+mercado alcista (resultado imposible para un trend-follower sano).
+
+**Arreglo:** tras un stop, solo unos días de enfriamiento y luego se permite
+reentrar. El seguidor de tendencia pasó de **-18.2%** a **+27.4%**.
+
+> Lección: un backtest puede verse mal por un **bug**, no por la estrategia.
+> Siempre revisa que el motor haga lo que crees.
+
+---
+
+## 3. Resultados (oro real, solo largos)
+
+### Backtest de una sola pasada (2010-2026)
+
+| Estrategia | Retorno | Sharpe | MaxDD |
+|---|---|---|---|
+| tendencia | +27.4% | 0.27 | -20.2% |
+| reversión | +26.9% | 0.30 | -15.8% |
+| ruptura | +33.2% | 0.28 | -22.0% |
+| EQUIPO | +13.1% | 0.18 | -20.2% |
+| **comprar y mantener** | **+248%** | **0.52** | -44.4% |
+
+Comprar y mantener gana en retorno; los agentes solo reducen la caída máxima.
+
+### Prueba fuera de muestra (`--split 0.6`)
+
+Las estrategias **se dieron vuelta** entre la Parte 1 y la Parte 2:
+
+| Estrategia | Sharpe Parte 1 (2010-2020) | Sharpe Parte 2 (2020-2026) |
+|---|---|---|
+| tendencia | 0.34 👍 | -0.08 📉 |
+| ruptura | 0.36 👍 | 0.01 📉 |
+| reversión | 0.04 👎 | 0.84 🚀 |
+| **EQUIPO** | 0.24 | **0.85** (positivo en ambas) |
+
+Las "mejores" del pasado fueron las peores del futuro, y viceversa. El **EQUIPO
+(diversificar)** fue lo único positivo en las dos mitades.
+
+### Walk-forward (elegir cada año la mejor config con solo el pasado)
+
+| | Retorno (12 años) | Sharpe |
+|---|---|---|
+| WALK-FORWARD (sistema adaptativo) | **-7.4%** | -0.03 |
+| comprar y mantener | **+271.6%** | 0.79 |
+
+El `Sharpe train` (lo que prometía) **no predijo** el `Sharpe test` (lo que
+resultó). El sistema "inteligente" **perdió dinero** en 12 años.
+
+---
+
+## 4. Las lecciones (lo más importante)
+
+1. **Un backtest bonito de una sola pasada no vale casi nada.** Hay que probarlo
+   fuera de muestra y walk-forward.
+2. **Optimizar sobre el pasado = sobreajuste.** Ajustar parámetros hasta que se
+   vea perfecto en la historia suele ser ajustarse al ruido. El pasado no predijo
+   el futuro.
+3. **Ganarle al mercado es genuinamente difícil.** Estrategias técnicas simples,
+   probadas con honestidad, no le ganaron a aguantar el oro. Es la norma, no un
+   fracaso personal.
+4. **Diversificar (el "equipo") es más robusto que apostar a una sola estrategia**,
+   porque no se puede saber de antemano cuál funcionará.
+5. **El resultado depende del régimen** del mercado (alcista vs caótico), y el
+   régimen no se puede predecir.
+
+---
+
+## 5. Qué me llevo (lo útil de verdad)
+
+Más que un sistema para ganar dinero, construí la **capacidad de distinguir una
+estrategia real de un espejismo**. Eso es un escudo anti-estafas: cuando alguien
+venda un bot "con 90% de aciertos", sé pedir prueba **fuera de muestra**.
+
+---
+
+## 6. Cómo reproducir
+
+```bash
+python fetch_data.py --symbol GC=F                      # bajar oro real
+python run.py --data data/gold.csv --no-short --plot    # backtest
+python run.py --data data/gold.csv --no-short --split 0.6   # fuera de muestra
+python walkforward.py --data data/gold.csv --no-short --plot # walk-forward
+```
+
+*Documento vivo — se irá actualizando a medida que sigamos probando.*
