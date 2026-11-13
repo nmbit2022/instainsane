@@ -87,7 +87,8 @@ def main() -> None:
         print("ese buen resultado era espejismo (sobreajuste). Lo robusto funciona en ambas.")
         return
 
-    results = _run_and_print(build_coordinator(), df, "RESULTADOS DEL BACKTEST (oro)")
+    label = os.path.splitext(os.path.basename(args.data))[0]
+    results = _run_and_print(build_coordinator(), df, f"RESULTADOS DEL BACKTEST ({label})")
     print("Guía rápida: Sharpe alto = buen retorno por riesgo. MaxDD = peor caída.")
     print("'EQUIPO (simple)' promedia parejo; 'EQUIPO (adaptativo)' pondera por")
     print("rendimiento reciente; 'comprar y mantener' es la referencia.")

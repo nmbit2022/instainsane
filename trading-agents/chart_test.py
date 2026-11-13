@@ -86,7 +86,8 @@ def main() -> None:
         print("ese buen resultado era espejismo (sobreajuste).")
         return
 
-    _run_and_print(df, agents, risk, "ESTRATEGIAS DE GRÁFICO (oro)")
+    label = os.path.splitext(os.path.basename(args.data))[0]
+    _run_and_print(df, agents, risk, f"ESTRATEGIAS DE GRÁFICO ({label})")
     print("Guía: Sharpe alto = buen retorno por riesgo. MaxDD = peor caída.")
     print("¿Alguna le gana a 'comprar y mantener' de forma consistente?")
 
