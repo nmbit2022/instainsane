@@ -59,13 +59,16 @@ Mercado objetivo: **XAUUSD** (oro spot contra el dólar). En tu máquina (sin el
 bloqueo de red del entorno de la nube):
 
 ```bash
-python fetch_data.py --source stooq     # XAUUSD spot (recomendado) -> data/gold.csv
-# alternativas:
-python fetch_data.py                    # XAUUSD=X vía yfinance
-python fetch_data.py --symbol GC=F      # futuro de oro (COMEX)
+python fetch_data.py                    # auto: prueba varias fuentes hasta que una funcione
+# si quieres forzar una fuente:
+python fetch_data.py --source stooq     # XAUUSD spot vía Stooq
+python fetch_data.py --source yfinance --symbol GC=F   # futuro de oro (COMEX)
 
 python run.py --data data/gold.csv --plot
 ```
+
+> Si falla la descarga, el script te muestra qué fuente falló y por qué, más
+> sugerencias. Suele ser el antivirus/VPN o una fuente temporalmente caída.
 
 ## Opciones útiles
 
