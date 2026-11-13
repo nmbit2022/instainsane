@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 
 from agents import Breakout, MeanReversion, RiskManager, TrendFollower
+from agents.chart_patterns import BollingerBounce, Engulfing, GoldenCross, MACDCross
 from engine.backtester import run_backtest
 from engine.data_loader import load_csv
 from engine.metrics import TRADING_DAYS, compute_metrics, format_metrics
@@ -29,9 +30,19 @@ from engine.metrics import TRADING_DAYS, compute_metrics, format_metrics
 WARMUP = 200  # días de calentamiento para los indicadores lentos (EMA 200, etc.)
 
 
-def build_candidates(allow_short: bool):
+def build_candidates(allow_short: bool, kind: str = "classic"):
     """Catálogo de configuraciones candidatas a elegir en cada ventana."""
     cands = []
+    if kind == "chart":
+        # Estrategias de análisis técnico de gráfico.
+        for fast, slow in [(50, 200), (20, 100)]:
+            cands.append((f"golden{fast}/{slow}", GoldenCross(fast, slow, allow_short)))
+        cands.append(("macd", MACDCross(allow_short)))
+        for k in [2.0, 2.5]:
+            cands.append((f"boll{k}", BollingerBounce(20, k, allow_short)))
+        cands.append(("engulfing", Engulfing(allow_short)))
+        return cands
+    # kind == "classic": tendencia, reversión, ruptura.
     for fast, slow in [(10, 50), (20, 100), (50, 200), (20, 50)]:
         cands.append((f"tend{fast}/{slow}", TrendFollower(fast, slow, allow_short)))
     for w, lo, hi in [(14, 30, 70), (14, 25, 75), (7, 20, 80)]:
@@ -47,9 +58,9 @@ def _sharpe(returns: pd.Series) -> float:
 
 
 def walk_forward(df: pd.DataFrame, train_days: int, test_days: int,
-                 allow_short: bool, risk: RiskManager):
+                 allow_short: bool, risk: RiskManager, kind: str = "classic"):
     """Rueda la ventana y devuelve la serie de retornos fuera de muestra."""
-    candidates = build_candidates(allow_short)
+    candidates = build_candidates(allow_short, kind)
     n = len(df)
     oos_returns = []      # retornos diarios fuera de muestra, pegados
     segments = []         # info de cada tramo de prueba
@@ -101,6 +112,9 @@ def main() -> None:
     ap.add_argument("--train-years", type=float, default=4.0)
     ap.add_argument("--test-years", type=float, default=1.0)
     ap.add_argument("--no-short", action="store_true")
+    ap.add_argument("--set", choices=["classic", "chart"], default="classic",
+                    help="classic = tendencia/reversión/ruptura; "
+                         "chart = golden cross, MACD, Bollinger, engulfing.")
     ap.add_argument("--plot", action="store_true")
     args = ap.parse_args()
 
@@ -116,10 +130,10 @@ def main() -> None:
     print(f"Datos: {args.data}  |  {len(df)} días  |  "
           f"{df.index[0].date()} -> {df.index[-1].date()}")
     print(f"Entrena {args.train_years} años, prueba {args.test_years} año(s), "
-          f"rodando hacia adelante.\n")
+          f"rodando hacia adelante.  Conjunto: {args.set}\n")
 
     wf_ret, wf_equity, segments = walk_forward(df, train_days, test_days,
-                                               allow_short, risk)
+                                               allow_short, risk, args.set)
 
     print("=" * 92)
     print("TRAMOS FUERA DE MUESTRA (cada uno con la config elegida solo con el pasado)")
