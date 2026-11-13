@@ -50,7 +50,7 @@ def run_backtest(
 
     held = 0.0                 # posición actual
     entry_price = np.nan       # precio de entrada de la posición actual
-    stopped_signal = None      # señal vigente cuando saltó el stop
+    stop_cd = 0                # días de enfriamiento restantes tras un stop
     cooldown_left = 0          # días restantes de enfriamiento por kill-switch
     peak = 1.0
 
@@ -71,27 +71,24 @@ def run_backtest(
         if cooldown_left > 0:
             target = 0.0
             cooldown_left -= 1
-            stopped_signal = None
 
-        # 4) Stop-loss por ATR sobre la posición abierta.
-        if held != 0 and not np.isnan(entry_price) and not np.isnan(atr_series[t]):
+        # 4) Enfriamiento tras un stop: unos pocos días plano, luego se puede
+        #    reentrar si la señal sigue vigente (no se bloquea toda la tendencia).
+        if stop_cd > 0:
+            target = 0.0
+            stop_cd -= 1
+        # 5) Stop-loss por ATR sobre la posición abierta.
+        elif held != 0 and not np.isnan(entry_price) and not np.isnan(atr_series[t]):
             adverse = (entry_price - close[t]) if held > 0 else (close[t] - entry_price)
             if adverse > risk.stop_atr * atr_series[t]:
                 target = 0.0
-                stopped_signal = raw[t]      # recordar la señal al parar
+                stop_cd = risk.stop_cooldown
 
-        # Mientras sigamos parados y la señal no cambie de signo, quedarse plano.
-        if stopped_signal is not None:
-            if np.sign(raw[t]) == np.sign(stopped_signal) and raw[t] != 0:
-                target = 0.0
-            else:
-                stopped_signal = None
-
-        # 5) Costo por cambiar de posición.
+        # 6) Costo por cambiar de posición.
         turn = abs(target - held)
         eq_after *= (1 - turn * cost_per_turn)
 
-        # 6) Registrar entrada nueva.
+        # 7) Registrar entrada nueva.
         if np.sign(target) != np.sign(held) and target != 0:
             entry_price = close[t]
         elif target == 0:

@@ -29,13 +29,17 @@ class RiskManager:
 
     def __init__(self, target_vol: float = 0.15, max_leverage: float = 1.5,
                  vol_window: int = 20, stop_atr: float = 3.0,
-                 max_drawdown: float = 0.20, cooldown: int = 10):
+                 max_drawdown: float = 0.20, cooldown: int = 10,
+                 stop_cooldown: int = 5):
         self.target_vol = target_vol
         self.max_leverage = max_leverage
         self.vol_window = vol_window
         self.stop_atr = stop_atr
         self.max_drawdown = max_drawdown
         self.cooldown = cooldown
+        # Días de enfriamiento tras un stop antes de poder reentrar. Evita
+        # quedar bloqueado fuera de una tendencia larga por un solo stop.
+        self.stop_cooldown = stop_cooldown
 
     def size(self, df: pd.DataFrame) -> pd.Series:
         """Multiplicador de tamaño (>=0) por volatilidad objetivo."""
