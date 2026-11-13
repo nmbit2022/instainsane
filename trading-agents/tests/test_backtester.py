@@ -71,6 +71,15 @@ def test_coordinator_returns_all_results():
     assert "comprar y mantener" in names
 
 
+def test_higher_cost_reduces_return():
+    # Para una estrategia que opera, más costo no debe mejorar el retorno.
+    df = _toy_df()
+    sig = Breakout(allow_short=False).generate_signals(df)
+    r_low = run_backtest(df, sig, "c0", RiskManager(), cost_per_turn=0.0).metrics["total_return"]
+    r_high = run_backtest(df, sig, "c1", RiskManager(), cost_per_turn=0.01).metrics["total_return"]
+    assert r_high <= r_low + 1e-9
+
+
 def test_walkforward_runs():
     from walkforward import walk_forward
     from agents import RiskManager
@@ -89,5 +98,6 @@ if __name__ == "__main__":
     test_no_lookahead_flat_signal_stays_flat()
     test_buy_and_hold_matches_price()
     test_coordinator_returns_all_results()
+    test_higher_cost_reduces_return()
     test_walkforward_runs()
     print("Todos los tests pasaron.")
