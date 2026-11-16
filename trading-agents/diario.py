@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import csv
 import os
+import re
 from datetime import date
 
 CSV = "data/operaciones.csv"
@@ -44,20 +45,44 @@ def preg(texto, defecto=""):
     return r or defecto
 
 
+# Limpiadores: toleran que se pegue la etiqueta junto al valor
+# (p. ej. "Precio de salida: 3857" -> "3857").
+def _num(s):
+    m = re.findall(r"-?\d+\.?\d*", s.replace(",", "."))
+    return m[-1] if m else s
+
+
+def _dir(s):
+    s = s.lower()
+    return "short" if "short" in s else "long" if "long" in s else s.strip()
+
+
+def _ver(s):
+    s = s.lower()
+    for w in ("short", "long", "esperar"):
+        if w in s:
+            return w
+    return s.strip()
+
+
+def _word(s):
+    return s.split(":")[-1].strip() if ":" in s else s.strip()
+
+
 def add() -> None:
     rows = cargar()
     nid = str(max([int(r["id"]) for r in rows], default=0) + 1)
     print(f"\nNueva operación #{nid}:")
     fila = {
         "id": nid,
-        "fecha": preg("Fecha", str(date.today())),
-        "instrumento": preg("Instrumento", "XAUUSD"),
-        "direccion": preg("Dirección (long/short)").lower(),
-        "entrada": preg("Precio de entrada"),
-        "stop": preg("Stop-loss"),
-        "take_profit": preg("Take profit"),
-        "tamano": preg("Tamaño (lotes)", "0.1"),
-        "veredicto": preg("Veredicto del sistema (long/short/esperar)"),
+        "fecha": _word(preg("Fecha", str(date.today()))),
+        "instrumento": _word(preg("Instrumento", "XAUUSD")),
+        "direccion": _dir(preg("Dirección (long/short)")),
+        "entrada": _num(preg("Precio de entrada")),
+        "stop": _num(preg("Stop-loss")),
+        "take_profit": _num(preg("Take profit")),
+        "tamano": _num(preg("Tamaño (lotes)", "0.1")),
+        "veredicto": _ver(preg("Veredicto del sistema (long/short/esperar)")),
         "motivo": preg("Motivo / setup (por qué entraste)"),
         "estado": "abierta",
         "fecha_cierre": "", "salida": "", "pnl_usd": "", "resultado": "",
@@ -75,9 +100,9 @@ def cerrar(nid: str) -> None:
     if fila["estado"] == "cerrada":
         print(f"La operación #{nid} ya estaba cerrada. La vuelvo a cargar.")
     print(f"\nCerrando operación #{nid} ({fila['direccion']} {fila['instrumento']}):")
-    fila["salida"] = preg("Precio de salida")
-    fila["pnl_usd"] = preg("Ganancia/pérdida en USD (de tu plataforma, ej: 240 o -50)")
-    fila["fecha_cierre"] = preg("Fecha de cierre", str(date.today()))
+    fila["salida"] = _num(preg("Precio de salida"))
+    fila["pnl_usd"] = _num(preg("Ganancia/pérdida en USD (de tu plataforma, ej: 240 o -50)"))
+    fila["fecha_cierre"] = _word(preg("Fecha de cierre", str(date.today())))
     try:
         pnl = float(fila["pnl_usd"])
         fila["resultado"] = "ganada" if pnl > 0 else "perdida" if pnl < 0 else "break-even"
@@ -127,9 +152,19 @@ def ver() -> None:
     print("  Datos tuyos. Con más operaciones, veremos qué funciona de verdad.")
 
 
+def borrar(nid: str) -> None:
+    rows = cargar()
+    nuevas = [r for r in rows if r["id"] != str(nid)]
+    if len(nuevas) == len(rows):
+        raise SystemExit(f"No encontré la operación #{nid}.")
+    guardar(nuevas)
+    print(f"🗑️  Operación #{nid} borrada.")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Diario de operaciones.")
-    ap.add_argument("accion", nargs="?", default="ver", choices=["ver", "add", "cerrar"])
+    ap.add_argument("accion", nargs="?", default="ver",
+                    choices=["ver", "add", "cerrar", "borrar"])
     ap.add_argument("id", nargs="?", default=None)
     args = ap.parse_args()
     if args.accion == "add":
@@ -138,6 +173,10 @@ def main() -> None:
         if not args.id:
             raise SystemExit("Indicá el número: python diario.py cerrar 1")
         cerrar(args.id)
+    elif args.accion == "borrar":
+        if not args.id:
+            raise SystemExit("Indicá el número: python diario.py borrar 1")
+        borrar(args.id)
     else:
         ver()
 
