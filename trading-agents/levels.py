@@ -66,23 +66,40 @@ def main() -> None:
     print(f"Datos: {args.data}  |  últimos {len(df)} días  |  "
           f"precio actual: {price:,.2f}\n")
 
-    # 1) Soportes y resistencias cercanos.
+    # Rango del periodo y dónde está el precio dentro de él.
+    rango_lo, rango_hi = float(df["Low"].min()), float(df["High"].max())
+    pos_pct = (price - rango_lo) / (rango_hi - rango_lo) * 100 if rango_hi > rango_lo else 50
+    print(f"Rango de {len(df)} días: {rango_lo:,.2f} (piso) .. {rango_hi:,.2f} (techo)")
+    print(f"El precio está en el {pos_pct:.0f}% del rango "
+          f"({'cerca de máximos' if pos_pct > 70 else 'cerca de mínimos' if pos_pct < 30 else 'en el medio'}).\n")
+
+    # 1) Soportes y resistencias con distancia en %.
     highs, lows = pivots(df, args.pivot_width)
-    res = sorted({round(float(p), 2) for _, p in highs if p > price})[:4]
-    sup = sorted({round(float(p), 2) for _, p in lows if p < price}, reverse=True)[:4]
-    fmt = lambda xs: ", ".join(f"{x:,.2f}" for x in xs) if xs else "ninguna clara"
-    print("== SOPORTES Y RESISTENCIAS CERCANOS ==")
-    print(f"  Resistencias arriba: {fmt(res)}")
-    print(f"  Precio actual:       {price:,.2f}")
-    print(f"  Soportes abajo:      {fmt(sup)}")
+    res = sorted({round(float(p), 2) for _, p in highs if p > price})[:3]
+    sup = sorted({round(float(p), 2) for _, p in lows if p < price}, reverse=True)[:3]
+    # Si no hay pivote por debajo, el piso del rango es el soporte clave.
+    if not sup:
+        sup = [round(rango_lo, 2)]
+
+    def con_dist(x):
+        d = (x - price) / price * 100
+        return f"{x:,.2f} ({d:+.1f}%)"
+
+    print("== SOPORTES Y RESISTENCIAS ==")
+    print(f"  Resistencias arriba: {', '.join(con_dist(x) for x in res) if res else 'ninguna (en máximos)'}")
+    print(f"  >> Precio actual:    {price:,.2f}")
+    print(f"  Soportes abajo:      {', '.join(con_dist(x) for x in sup)}")
 
     # 2) Perfil de volumen: zonas de acumulación.
     centers, vp = volume_profile(df)
     order = np.argsort(vp)[::-1]
+    dist = lambda x: (x - price) / price * 100
+    poc = centers[order[0]]
+    arriba_abajo = "arriba → resistencia" if poc > price else "abajo → soporte"
     print("\n== ZONAS DE ACUMULACIÓN (más volumen negociado) ==")
-    print(f"  POC (zona #1): {centers[order[0]]:,.2f}  (el imán de precio más fuerte)")
+    print(f"  POC (zona #1): {poc:,.2f} ({dist(poc):+.1f}%)  — imán más fuerte, está {arriba_abajo}")
     for rank, k in enumerate(order[1:3], start=2):
-        print(f"  Zona #{rank}:      {centers[k]:,.2f}")
+        print(f"  Zona #{rank}:      {centers[k]:,.2f} ({dist(centers[k]):+.1f}%)")
 
     # 3) Volúmenes anormales recientes.
     vol = df["Volume"]
