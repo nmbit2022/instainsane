@@ -36,10 +36,12 @@ def main() -> None:
     df = df.dropna(subset=["Datetime", "Close"]).sort_values("Datetime")
 
     end = df["Datetime"].iloc[-1]
-    span = pd.Timedelta(days=1 if args.period == "day" else 7)
-    win = df[df["Datetime"] >= end - span].copy()
+    # Usar las últimas velas DISPONIBLES (robusto ante fines de semana/feriados):
+    # ~24h de mercado para 'day', ~1 semana de trading para 'week'.
+    bars = 24 if args.period == "day" else 120
+    win = df.tail(bars).copy()
     if len(win) < 3:
-        raise SystemExit("Muy pocas velas en el periodo. ¿Datos intradía actualizados?")
+        raise SystemExit("Muy pocas velas. Baja datos intradía con: python fetch_intraday.py")
 
     hi, lo = win["High"].max(), win["Low"].min()
     first, last = win["Close"].iloc[0], win["Close"].iloc[-1]
