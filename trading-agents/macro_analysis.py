@@ -70,7 +70,7 @@ def main() -> None:
             if serie is None:
                 raise RuntimeError("sin datos")
             ret = serie.pct_change()
-            joined = pd.concat([gold_ret, ret], axis=1).dropna()
+            joined = pd.concat([gold_ret, ret], axis=1, sort=False).dropna()
             if len(joined) < 30:
                 raise RuntimeError("pocos datos")
             corr = joined.iloc[:, 0].corr(joined.iloc[:, 1])
