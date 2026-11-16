@@ -33,6 +33,10 @@ echo.
 python recap.py --period week
 
 echo.
+echo ==== Tu diario de operaciones ====
+python diario.py
+
+echo.
 echo ============================================================
 echo  Listo. Sube con la rueda del mouse para leer el brief.
 echo  Abre tu panel: el link que te paso Claude.

@@ -4,3 +4,4 @@ reports/
 data/gold.csv
 .venv/
 trading-agents.zip
+data/operaciones.csv
