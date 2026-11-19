@@ -59,7 +59,7 @@ def main() -> None:
 
     gold_ret = gold.pct_change()
 
-    print(f"Oro: {args.gold}  |  desde {args.start}  |  {len(gold)} días\n")
+    print(f"Activo: {args.gold}  |  desde {args.start}  |  {len(gold)} días\n")
     print("=" * 78)
     print(f"{'Variable':>18} | {'Correlación':>11} | {'Relación':>10} | {'Rango móvil (min..max)':>24}")
     print("-" * 78)
@@ -83,11 +83,9 @@ def main() -> None:
 
     print("=" * 78)
     print("\nLectura:")
-    print("  - Correlación negativa fuerte con el dólar = cuando el dólar cae, el oro sube.")
-    print("  - El 'Rango móvil' muestra que la correlación CAMBIA con el tiempo: en")
-    print("    crisis se dispara, en calma se afloja. No es fija.")
-    print("\nOjo: correlación NO es causalidad, y una correlación fuerte en el pasado")
-    print("puede debilitarse. Es contexto para entender el oro, no una señal de compra.")
+    print("  +1 = se mueven igual · −1 = se mueven al revés · 0 = sin relación.")
+    print("  El 'Rango móvil' muestra que la correlación CAMBIA con el tiempo (no es fija).")
+    print("\nOjo: correlación NO es causalidad, y puede debilitarse. Es contexto, no señal.")
 
 
 def _relacion(nombre, corr):
