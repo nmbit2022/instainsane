@@ -42,17 +42,22 @@ def flujo_ordenes(path: str) -> int:
     return 1 if presion > 0 else -1 if presion < 0 else 0
 
 
+def _mom_pct(symbol: str) -> float:
+    """Cambio % (~1 mes) del cierre de un símbolo."""
+    import yfinance as yf
+    s = yf.download(symbol, period="3mo", progress=False, auto_adjust=False)
+    if s is None or s.empty:
+        raise RuntimeError("sin datos")
+    if hasattr(s.columns, "nlevels") and s.columns.nlevels > 1:
+        s.columns = s.columns.get_level_values(0)
+    c = s["Close"].dropna()
+    return (c.iloc[-1] / c.iloc[-20] - 1) * 100
+
+
 def dolar_bias() -> tuple[int, str]:
-    """Dólar subiendo => bias short para el oro (-1). Bajando => long (+1)."""
+    """Dólar subiendo => bias short para el ORO (-1). Bajando => long (+1)."""
     try:
-        import yfinance as yf
-        dxy = yf.download("DX-Y.NYB", period="3mo", progress=False, auto_adjust=False)
-        if dxy is None or dxy.empty:
-            raise RuntimeError
-        if hasattr(dxy.columns, "nlevels") and dxy.columns.nlevels > 1:
-            dxy.columns = dxy.columns.get_level_values(0)
-        c = dxy["Close"].dropna()
-        chg = (c.iloc[-1] / c.iloc[-20] - 1) * 100
+        chg = _mom_pct("DX-Y.NYB")
         if chg > 0.5:
             return -1, f"dólar subiendo {chg:+.1f}% (en contra del oro)"
         if chg < -0.5:
@@ -62,10 +67,34 @@ def dolar_bias() -> tuple[int, str]:
         return 0, "dólar no disponible (míralo manual)"
 
 
+def vix_bias() -> tuple[int, str]:
+    """VIX subiendo => miedo => bias short para un ÍNDICE (-1). Bajando => long (+1)."""
+    try:
+        chg = _mom_pct("^VIX")
+        if chg > 5:
+            return -1, f"VIX subiendo {chg:+.1f}% (miedo, en contra del índice)"
+        if chg < -5:
+            return 1, f"VIX bajando {chg:+.1f}% (calma, a favor del índice)"
+        return 0, f"VIX plano ({chg:+.1f}%)"
+    except Exception:  # noqa: BLE001
+        return 0, "VIX no disponible (míralo manual)"
+
+
+def detectar_mercado(path: str, override: str | None) -> str:
+    """Detecta si es índice (Nasdaq/S&P...) por el nombre del archivo de datos."""
+    if override:
+        return override
+    low = path.lower()
+    claves = ("nasdaq", "us100", "nq", "spx", "sp500", "us500", "us30", "dow", "index", "indice")
+    return "indice" if any(k in low for k in claves) else "oro"
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="¿Long o short ahora? Veredicto del momento.")
     ap.add_argument("--data", default="data/gold.csv")
     ap.add_argument("--intra", default="data/gold_1h.csv")
+    ap.add_argument("--market", choices=["oro", "indice"], default=None,
+                    help="oro = usa el dólar; indice = usa el VIX. Por defecto se detecta solo.")
     args = ap.parse_args()
     if not os.path.exists(args.data):
         raise SystemExit(f"No existe {args.data}. Descarga datos con fetch_data.py.")
@@ -102,9 +131,14 @@ def main() -> None:
     votos.append(voto("Flujo de órdenes (1h)", v,
                       {1: "dominan compradores", -1: "dominan vendedores", 0: "sin datos intradía"}[v]))
 
-    # 6) Dólar.
-    v, det = dolar_bias()
-    votos.append(voto("Dólar (macro)", v, det))
+    # 6) Macro: dólar para el oro, VIX para índices (se detecta solo).
+    mercado = detectar_mercado(args.data, args.market)
+    if mercado == "indice":
+        v, det = vix_bias()
+        votos.append(voto("VIX / miedo (macro)", v, det))
+    else:
+        v, det = dolar_bias()
+        votos.append(voto("Dólar (macro)", v, det))
 
     # Veredicto.
     score = sum(x["voto"] for x in votos)
